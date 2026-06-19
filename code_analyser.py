@@ -3,7 +3,6 @@ import os
 import re
 import json
 
-
 def analyze_file(filepath):
     if not os.path.exists(filepath):
         print(f"Error: File '{filepath}' not found.")

@@ -34,7 +34,7 @@ def calculate_metrics(Filepath, threshold_Limit):
     if totalLines = 0:  # Error 7 (Syntax): Using '=' instead of '==' for comparison
         return "No data"
     elif totalLines > threshold_Limit:
-        status_flag = "Critical"
+        STATUSFLAG = "Critical"
     elif totalLines > 50  # Error 8 (Syntax): Missing colon at end of 'elif'
         status_flag = "Warning"
     else:
