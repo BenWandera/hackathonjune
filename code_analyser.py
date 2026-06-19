@@ -31,8 +31,8 @@ def analyze_file(filepath):
     }
     
     warnings = []
-    correct_variables = 0
-    total_variables = 0
+    consecutive_blank_count = 0
+    max_consecutive_blanks = 0
 
     with open(filepath, 'r', encoding='utf-8') as file:
         for line in file:
@@ -42,7 +42,13 @@ def analyze_file(filepath):
             # 1. Handle Blank Lines
             if not stripped:
                 blank_lines += 1
+                consecutive_blank_count += 1
                 continue
+            
+            # Track maximum consecutive blank lines
+            if consecutive_blank_count > max_consecutive_blanks:
+                max_consecutive_blanks = consecutive_blank_count
+            consecutive_blank_count = 0
 
             # 2. Handle Comments (Assuming standard # comments for Python)
             if stripped.startswith('#'):
@@ -62,26 +68,32 @@ def analyze_file(filepath):
             var_match = var_pattern.match(stripped)
             if var_match:
                 var_name = var_match.group(1)
-                total_variables += 1
-                if snake_case_pattern.match(var_name):
-                    correct_variables += 1
-                else:
+                if not snake_case_pattern.match(var_name):
                     warnings.append(f"Variable '{var_name}' at line {total_lines} is not snake_case")
+
+    # Track final consecutive blank lines if file ends with blanks
+    if consecutive_blank_count > max_consecutive_blanks:
+        max_consecutive_blanks = consecutive_blank_count
 
     # 5. Calculate Comment Ratio
     comment_ratio = round((comment_lines / total_lines) * 100, 2) if total_lines > 0 else 0
 
-    # 6. Calculate Health Score based on variable naming conventions only
-    # Blank lines and comment lines do NOT affect health score
-    # Formula: (correct_variables_with_snake_case / total_variables) * 100
-    if total_variables > 0:
-        health_score = round((correct_variables / total_variables) * 100, 2)
+    # 6. Calculate Health Score
+    # Formula: (lines_of_code + comment_lines) / (lines_of_code + comment_lines + errors + consecutive_blank_lines)
+    # errors = non-snake_case variables
+    errors = len(warnings)
+    
+    numerator = code_lines + comment_lines
+    denominator = code_lines + comment_lines + errors + max_consecutive_blanks
+    
+    if denominator > 0:
+        health_score = round((numerator / denominator) * 100, 2)
     else:
         health_score = 100
 
     # Construct the JSON-like dictionary output
     output = {
-        "health_score": f"{health_score}/100",
+        "health_score": health_score,
         "line_metrics": {
             "total_lines": total_lines,
             "blank_lines": blank_lines,

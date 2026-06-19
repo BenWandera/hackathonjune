@@ -13,8 +13,7 @@ def execution_pipeline():
     # Correct: This is valid snake_case
     current_status = "initializing"
     
-    # Violation 3: Standard camelCase format
-    totalRecordsProcessed = 1420
+    total_records_processed = 1420
     
     # Violation 4: PascalCase format
     ActiveUserCount = 89
